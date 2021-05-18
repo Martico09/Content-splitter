@@ -1,0 +1,50 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "PduHeader.h"
+#include "checksum.h"
+#include "GUIDGenerator.h"
+#include "Pdu.h"
+#include "helper.h"
+#include "Base64Encoding.h"
+#include "Fragmentation.h"
+#include "Defragmentation.h"
+
+int main()
+{
+    printf("To fragment, enter F or f\n");
+    printf("To defragment, enter D or d\n");
+    printf("To exit, enter E or e or any other chararcter\n\n");
+    
+    char choice;
+    printf("Enter your choice: ");
+    scanf("%c",&choice);
+    char enter;
+    scanf("%c",&enter);
+
+    switch(choice)
+    {
+        case 'F':
+        case 'f':
+        {
+            ExecuteFragmentation();
+            break;
+        }
+
+        case 'D':
+        case 'd':
+        {
+            ExecuteDefragmentation();
+            break;
+        }
+
+        case 'E':
+        case 'e':
+        {
+            
+            break;
+        }
+    }
+
+    return 0;
+}

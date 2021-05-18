@@ -1,0 +1,66 @@
+void EncodeBase64(char* content, char outEncodedString[])
+{
+    char characterSet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"; 
+
+    int contentLength = strlen(content);
+    int paddingRequired = contentLength % 3;
+    if(paddingRequired > 0)
+    {
+        paddingRequired = 3-paddingRequired;
+    }
+
+    int alteredContentLength = contentLength + paddingRequired;
+    char contentToBeEncoded[alteredContentLength];
+    strcpy(contentToBeEncoded, content);
+
+    for (int i = 0; i < paddingRequired; i++)
+    {
+        contentToBeEncoded[contentLength + paddingRequired - 1 - i] = '\0';
+    }
+
+    int encodedStringIndexer = -1;
+    char base64EncodedString[alteredContentLength + (alteredContentLength /3)];
+    for (int indexer = 0; indexer < alteredContentLength; indexer+=3)
+    {
+        char charAtOffset0 = contentToBeEncoded[indexer];
+        char charAtOffset1 = contentToBeEncoded[indexer + 1];
+        char charAtOffset2 = contentToBeEncoded[indexer + 2];
+
+        unsigned char _1stBase64CharIndex = charAtOffset0 >> 2;
+        unsigned char _2ndBase64CharIndex = ((charAtOffset0 << 4) & 48) | (charAtOffset1 >> 4);
+        unsigned char _3rdBase64CharIndex = ((charAtOffset1 << 2) & 60) | (charAtOffset2 >> 6);
+        unsigned char _4thBase64CharIndex = charAtOffset2 & 63;
+
+        base64EncodedString[++encodedStringIndexer] = characterSet[_1stBase64CharIndex];
+        base64EncodedString[++encodedStringIndexer] = characterSet[_2ndBase64CharIndex];
+        base64EncodedString[++encodedStringIndexer] = characterSet[_3rdBase64CharIndex];
+        base64EncodedString[++encodedStringIndexer] = characterSet[_4thBase64CharIndex];
+    }
+
+    if(paddingRequired > 0)
+    {
+        for (int i = 0; i < paddingRequired; i++)
+        {
+            base64EncodedString[encodedStringIndexer--] = '=';
+        }
+    }
+
+    strcpy(outEncodedString, base64EncodedString);
+}
+
+unsigned char IndexOf(char base64EncodedChar)
+{
+    unsigned char indexOf = 0;
+    char characterSet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"; 
+    
+    for (int indexer = 0; indexer < 64; indexer++)
+    {
+        if(characterSet[indexer] == base64EncodedChar)
+        {
+            indexOf = indexer;
+            break;
+        }
+    }
+
+    return indexOf;
+}

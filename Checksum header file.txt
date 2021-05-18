@@ -1,0 +1,22 @@
+#include <stdio.h>
+#include <string.h>
+
+short ComputeChecksum(char* encodedData)
+{
+    unsigned char fwdSum, backSum;
+    int dataLength = strlen(encodedData);
+
+    for(int indexer=0;indexer< dataLength;indexer++)
+    {
+        fwdSum += encodedData[indexer];
+    } 
+
+    for(int indexer = dataLength - 1; indexer>=0; indexer--)
+    {
+        backSum += encodedData[indexer];
+    }
+
+    short computedChecksum = fwdSum + backSum;
+
+    return computedChecksum;
+}

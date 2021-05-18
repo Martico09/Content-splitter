@@ -1,0 +1,31 @@
+int GetFileExtension(char* filename, char* outExtn)
+{
+	int fileNameLength = strlen(filename);
+	
+	int counter=1;
+	for(int indexer=fileNameLength;indexer>=0;indexer--)
+	{
+		if(filename[indexer]=='.')
+		{
+			counter = indexer;
+			break;
+		}
+	}
+
+	counter += 1;
+	
+	int extLen = fileNameLength-counter + 1;
+	char ext[extLen];
+	int indexer = 0;
+
+	for(int reverseIndexer=counter; reverseIndexer < fileNameLength; reverseIndexer++)
+	{
+		ext[indexer++] = filename[reverseIndexer];
+	}
+
+    ext[extLen] = '\0';
+
+	strcpy(outExtn,ext);
+
+    return extLen - 1;
+}

@@ -1,0 +1,103 @@
+void SendPdu (struct Pdu pdu, char* destinationFolder, char* originalFileExtn)
+{
+    int totalSize = 18 + strlen(pdu.data) + 4;
+    char fragmentData[totalSize];
+
+    sprintf(fragmentData, "%08X%04X%02X%04X%s%04X", 
+        pdu.header.messageIdentifier,  pdu.header.sequenceNumber, pdu.header.isLastFlag, pdu.header.length, pdu.data, pdu.checksum);
+
+    char fileName[400];
+
+    int fileFilePathLength = strlen(destinationFolder) + 1 + 19 + strlen(originalFileExtn) + 3;
+
+    snprintf(fileName, fileFilePathLength, "%s\\FRAG_%08X_%04X.%sfrg", destinationFolder, pdu.header.messageIdentifier, pdu.header.sequenceNumber, originalFileExtn);
+
+    FILE *fragmentFile; 
+    fragmentFile = fopen (fileName, "w"); 
+    if (fragmentFile == NULL) 
+    { 
+        fprintf(stderr, "\nError opend file\n"); 
+        exit (1); 
+    } 
+      
+    fwrite (fragmentData, strlen(fragmentData), 1, fragmentFile); 
+    if(fwrite != 0)  
+    {
+        printf("\nFragment(%d): File %s written successfully !", pdu.header.sequenceNumber, fileName); 
+    }
+    else
+    { 
+        printf("Error in writting Fragment File %s !\n", fileName); 
+    }
+    fclose (fragmentFile); 
+}
+
+void ExecuteFragmentation()
+{
+    printf("\nEnter the file path: ");
+    char filepath[256];
+    gets(filepath);
+
+    FILE *file;
+    file = fopen(filepath, "rb"); //read binary
+    
+    if(file == NULL)
+    {
+        printf("The path (%s) does not look valid !\n", filepath);
+        exit(1);
+    }
+
+    printf("Enter the destination folder: ");
+    char destinationFolder[400];
+    gets(destinationFolder);
+
+    printf("Enter the fragment size: ");
+    int fragmentSize;
+    scanf("%d",&fragmentSize);
+    
+    char extn[10] = "";
+    GetFileExtension(filepath, extn);
+
+    fseek(file, 0L, SEEK_END); 
+    long int fileSize;
+    fileSize = ftell(file);
+    
+    printf("\n\nThe File Size is: %d bytes", fileSize);
+    printf("\nThe Fragment Size is: %d bytes", fragmentSize);
+
+    int fragments = fileSize / fragmentSize;
+    if(fileSize % fragmentSize != 0)
+    {
+        fragments += 1;
+    }
+    printf("\nTotal expected fargments are: %d\n\n", fragments);
+
+    long messageIdentifier = GenerateGUID();
+    fseek(file, 0, SEEK_SET);
+
+    int sequenceNumber = 0;
+    int bytesRead = 0;
+    
+    for(int i = 0; i < fragments; i++)
+    {
+        char buffer[fragmentSize + 1];
+        bytesRead = fread(&buffer, 1, fragmentSize, file);
+        buffer[fragmentSize] = '\0';
+
+        char unsigned isLastFlag = 0;
+        if(i == fragments - 1)
+        {
+            isLastFlag = 1;
+        }
+
+        char encodedData[((strlen(buffer)/3) *4)+2];
+        EncodeBase64(buffer, encodedData); 
+
+        struct PduHeader header = BuildPduHeader(messageIdentifier, ++sequenceNumber, strlen(encodedData), isLastFlag);
+        short checksum = ComputeChecksum(encodedData);
+        struct Pdu pdu = BuildPdu(header, encodedData, checksum);
+        SendPdu(pdu, destinationFolder, extn);
+    } 
+
+    fclose(file);
+}

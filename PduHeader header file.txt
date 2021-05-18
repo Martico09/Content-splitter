@@ -1,0 +1,29 @@
+struct PduHeader
+{
+    long messageIdentifier;
+    int sequenceNumber;
+    unsigned char isLastFlag;
+    short length;
+};
+
+struct PduHeader BuildPduHeader (long messeageIdentifier, int sequenceNumber, short length, unsigned char isLastFlag)
+{
+   struct PduHeader header;
+
+   header.messageIdentifier = messeageIdentifier;
+   header.sequenceNumber = sequenceNumber;
+   header.isLastFlag = isLastFlag;
+   header.length = length;
+   
+   return header;
+}
+
+char* SerializePduHeader(struct PduHeader header)
+{
+    static char hexHeader[18];
+
+    snprintf(hexHeader, 18, "%08X%04X%02X%04X", 
+        header.messageIdentifier,  header.sequenceNumber, header.isLastFlag, header.length);
+
+    return hexHeader;
+}

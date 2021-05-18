@@ -1,0 +1,36 @@
+struct Pdu
+{
+    struct PduHeader header;
+    char* data;
+    short checksum;
+    char data1[5000];
+};
+
+struct Pdu BuildPdu (struct PduHeader header, char* encodedData, short checksum)
+{
+   struct Pdu pdu;
+
+   pdu.header = header;
+   pdu.data = encodedData;
+   pdu.checksum = checksum;
+
+   return pdu;
+}
+
+const char* SerializePdu(struct Pdu pdu)
+{
+    char* hexHeader = SerializePduHeader(pdu.header);
+
+    char hexChecksum[4];
+    snprintf(hexChecksum, 4, "%04X", pdu.checksum);
+
+    int totalSize = strlen(hexHeader) + strlen(pdu.data) + strlen(hexChecksum);
+
+    char hexPdu[totalSize];
+
+    strcat(hexPdu, hexHeader);
+    strcat(hexPdu, pdu.data);
+    strcat(hexPdu, hexChecksum);
+
+    return hexPdu;
+}

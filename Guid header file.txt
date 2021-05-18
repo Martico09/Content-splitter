@@ -1,0 +1,70 @@
+#include <time.h>
+
+long int GenerateGUID() 
+{
+    time_t T= time(NULL);
+    struct tm currentTime = *localtime(&T);
+    struct tm refernceTime;
+    refernceTime.tm_year = 70;
+    refernceTime.tm_mon = 1;
+    refernceTime.tm_mday = 1;
+        
+    int leap = 0;
+    for(int i=refernceTime.tm_year;i<currentTime.tm_year;i++)
+    {
+        if(i%4==0)
+        {
+            leap++;
+        }
+    }
+    
+    int yearToDays;
+    yearToDays = ((currentTime.tm_year-refernceTime.tm_year) * 365) + leap;
+    
+    int finalYearDays = 0;
+    for(int indexer = 1; indexer< currentTime.tm_mon; indexer++)
+    {
+        int monthDays = 0;
+        switch(indexer)
+        {
+            case 1:
+            monthDays = 0;
+            break;
+            case 2: //Feb
+            case 4: //April
+            case 6: //June
+            case 8: //August
+            case 9: //Sept
+            case 11: //Nov
+            monthDays = 31;
+            break;
+            case 3: //March
+            monthDays = 28;
+            break;
+            case 5://May
+            case 7://July
+            case 10://Oct
+            case 12://Nov
+            monthDays = 30;
+            break;
+        }
+
+        finalYearDays += monthDays;
+    }
+
+    if(currentTime.tm_year%4 == 0 
+        && (currentTime.tm_mon == 2 && currentTime.tm_mday == 29) || (currentTime.tm_mon > 2) )
+    {
+        finalYearDays += 1;
+    }
+
+    yearToDays += finalYearDays;
+    int totalDays = (currentTime.tm_mday - 1) + yearToDays;
+    
+    long int epochTime = (totalDays * 24 * 3600) 
+        + (currentTime.tm_hour * 3600) 
+        + (currentTime.tm_min * 60)
+        + (currentTime.tm_sec);
+
+        return epochTime;
+}
